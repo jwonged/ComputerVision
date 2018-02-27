@@ -5,18 +5,6 @@ Created on 27 Feb 2018
 '''
 
 
-class MyClass(object):
-    '''
-    classdocs
-    '''
-
-    def __init__(self, params):
-        pass
-        '''
-        Constructor
-        '''
-
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
