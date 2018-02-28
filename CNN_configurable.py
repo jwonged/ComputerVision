@@ -220,11 +220,11 @@ def main():
     
     config = Config()
     model = CNNModel(config)
-    model.constructModel()    
-    model.train(train_data, train_labels)
+    #model.constructModel()    
+    #model.train(train_data, train_labels)
     
-    predictModel = CNNModel(config)
-    predictModel.runPredict(eval_data, eval_labels)
+    #predictModel = CNNModel(config)
+    model.runPredict(eval_data, eval_labels)
     
 if __name__ == '__main__':
     main()
