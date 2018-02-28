@@ -173,6 +173,8 @@ class CNNModel(object):
             yield self.trainData[start:], self.trainlabels[start:]
         
     def runPredict(self):
+        #restore highest scoring model
+        self.restoreModel()
         summary, acc = self.sess.run(
                     [self.merged, self.accuracy], 
                     feed_dict={self.x : self.testData, 
@@ -180,8 +182,23 @@ class CNNModel(object):
                                self.dropout : 1.0})
         print('Model test accuracy: {}'.format(acc))
         self.test_writer.add_summary(summary)
+    
+    def restoreModel(self):
+        print('restoring model from {}'.format(self.config.restoreModel))
+        self.sess = tf.Session()
+        self.saver = saver = tf.train.import_meta_graph(self.config.restoreModel)
+        saver.restore(self.sess, tf.train.latest_checkpoint(self.config.restoreModelPath))
+        
+        graph = tf.get_default_graph()
+        self.accuracy = graph.get_tensor_by_name('accuracy:0')
+        self.x = graph.get_tensor_by_name('img-input:0')
+        self.labels = graph.get_tensor_by_name('label-input:0')
+        self.dropout = graph.get_tensor_by_name('dropout:0')
+        self.saver = tf.train.Saver()
+        
         
 class Config():
+    #99.3% accuracy
     batchSize = 100
     nTrainData = 55000
     nEpoch = 40
@@ -193,8 +210,9 @@ class Config():
     lossRateDecay = 0.95
     trainValSplit = 0.9
     
-    saveModelFile = './'
-    
+    saveModelFile = './yolo'
+    restoreModelPath = './'
+    restoreModel = './yolo.meta'
     
 if __name__ == '__main__':
     # Load training and eval data
@@ -208,6 +226,9 @@ if __name__ == '__main__':
     model = CNNModel(config, train_data, train_labels, eval_data, eval_labels)
     model.constructModel()    
     model.train()
+    
+    
+    
     
     
     
