@@ -33,17 +33,10 @@ class Config():
     restoreModel = './yolo.meta'
 
 class CNNModel(object):
-    def __init__(self, config, trainData, trainlabels, eval_data, eval_labels):
+    def __init__(self, config):
         self.config = config
         self.sess = None
         self.saver = None
-        splitIndex = int(round(len(trainData)*self.config.trainValSplit))
-        self.trainData = trainData[:splitIndex]
-        self.trainlabels = trainlabels[:splitIndex]
-        self.valData = trainData[splitIndex:]
-        self.vallabels = trainlabels[splitIndex:]
-        self.testData = eval_data
-        self.testlabels =  eval_labels
     
     def constructModel(self):
         self.x = tf.placeholder(tf.float32, [None, 784], name='img-input')
@@ -124,8 +117,14 @@ class CNNModel(object):
         
         print('Initializing model...')
     
-    def train(self):
+    def train(self, trainData, trainlabels):
         print('Starting training')
+        splitIndex = int(round(len(trainData)*self.config.trainValSplit))
+        self.trainData = trainData[:splitIndex]
+        self.trainlabels = trainlabels[:splitIndex]
+        self.valData = trainData[splitIndex:]
+        self.vallabels = trainlabels[splitIndex:]
+        
         highestScore = 0
         nEpochWithoutImprovement = 0
         
@@ -219,9 +218,12 @@ def main():
     eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
     
     config = Config()
-    model = CNNModel(config, train_data, train_labels, eval_data, eval_labels)
+    model = CNNModel(config)
     model.constructModel()    
-    model.train()
+    model.train(train_data, train_labels)
+    
+    predictModel = CNNModel(config)
+    predictModel.runPredict(eval_data, eval_labels)
     
 if __name__ == '__main__':
     main()
