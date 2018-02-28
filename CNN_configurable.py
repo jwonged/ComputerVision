@@ -196,6 +196,7 @@ class CNNModel(object):
         print('Model test accuracy: {}'.format(acc))
     
     def restoreModel(self):
+        tf.reset_default_graph
         print('restoring model from {}'.format(self.config.restoreModel))
         self.sess = tf.Session()
         self.saver = tf.train.import_meta_graph('./yolo.meta')
