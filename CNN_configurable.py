@@ -20,8 +20,10 @@ class CNNModel(object):
         self.config = config
         self.sess = None
         self.saver = None
-        self.trainData = trainData
-        self.trainlabels = trainlabels
+        self.trainData = trainData[:len(trainData)*self.config.trainValSplit]
+        self.trainlabels = trainlabels[:len(trainData)*self.config.trainValSplit]
+        self.valData = trainData[len(trainData) * self.config.trainValSplit:]
+        self.vallabels = trainlabels[len(trainData)*self.config.trainValSplit:]
         self.testData = eval_data
         self.testlabels =  eval_labels
     
@@ -29,6 +31,8 @@ class CNNModel(object):
         with tf.name_scope('input'):
             self.x = tf.placeholder(tf.float32, [None, 784], name='img-input')
             self.labels = tf.placeholder(tf.int64, [None], name='label-input')
+            self.lr = tf.placeholder(dtype=tf.float32, shape=[], name="lr")
+            self.dropout = tf.placeholder(dtype=tf.float32, shape=[], name="dropout")
             
         with tf.name_scope('input_reshape'):
             shaped_x = tf.reshape(self.x, [-1, 28, 28, 1])
@@ -60,7 +64,7 @@ class CNNModel(object):
                                           activation=tf.nn.relu,
                                           kernel_initializer=tf.contrib.layers.xavier_initializer())
             if (self.config.dropoutVal < 1.0):
-                fcLayer1 = tf.nn.dropout(fcLayer1, self.config.dropoutVal)
+                fcLayer1 = tf.nn.dropout(fcLayer1, self.dropout)
             self.y = tf.layers.dense(inputs=fcLayer1, units=10)
             
         with tf.variable_scope('loss'):
@@ -82,13 +86,13 @@ class CNNModel(object):
         with tf.variable_scope("train_step"):
             if self.config.modelOptimizer == 'adam': 
                 print('Using adam optimizer')
-                optimizer = tf.train.AdamOptimizer(self.config.lossRate)
+                optimizer = tf.train.AdamOptimizer(self.lr)
             elif self.config.modelOptimizer == 'adagrad':
                 print('Using adagrad optimizer')
-                optimizer = tf.train.AdagradOptimizer(self.config.lossRate)
+                optimizer = tf.train.AdagradOptimizer(self.lr)
             else:
                 print('Using grad desc optimizer')
-                optimizer = tf.train.GradientDescentOptimizer(self.config.lossRate)
+                optimizer = tf.train.GradientDescentOptimizer(self.lr)
         
         self.train_op = optimizer.minimize(self.loss, name='trainModel')
         
@@ -103,27 +107,52 @@ class CNNModel(object):
         print('Initializing model...')
     
     def train(self):
-        for i in range(self.config.nEpoch):
-            acc = self.run_epoch()
-            print('Epoch {} accuracy: {}'.format(i,acc))
+        print('Starting training')
+        highestScore = 0
+        nEpochWithoutImprovement = 0
+        
+        
+        for nEpoch in range(self.config.nEpoch):
+            score = self.run_epoch()
+            print('Epoch {} accuracy: {:>6.1%}'.format(nEpoch,score))
+            
+            self.config.lossRate *= self.config.lossRateDecay
+            
+            if (score >= highestScore):
+                nEpochWithoutImprovement = 0
+                self.saver.save(self.sess, self.config.saveModelFile)
+                highestScore = score
+            else:
+                nEpochWithoutImprovement += 1
+                if nEpochWithoutImprovement >= self.config.nEpochsWithoutImprov:
+                    print('Early stopping at epoch {} with {} epochs without improvement'.format(
+                            nEpoch+1, nEpochWithoutImprovement))
+                    break
+        
+        self.runPredict()
         
     def run_epoch(self):
-        print('Starting training')
         for index, (x,labels) in enumerate(self._getNextBatch(self.config.batchSize)):
             if (index % 10 == 0):
                 summary, acc = self.sess.run(
                     [self.merged, self.accuracy], 
-                    feed_dict={self.x : self.testData, self.labels : self.testlabels})
+                    feed_dict={self.x : self.valData, 
+                               self.labels : self.vallabels,
+                               self.dropout : self.config.dropoutVal,
+                               self.lr : self.config.lossRate})
                 self.test_writer.add_summary(summary, index)
                 print('Accuracy at batch {} : {:>6.1%}'.format(index, acc))
             _, summary, _ = self.sess.run(
                 [self.y, self.merged, self.train_op], 
-                feed_dict={self.x : x, self.labels : labels})
+                feed_dict={self.x : x, 
+                           self.labels : labels,
+                           self.dropout : self.config.dropoutVal,
+                           self.lr : self.config.lossRate})
             self.train_writer.add_summary(summary, index)
             
         summary, acc = self.sess.run(
                     [self.merged, self.accuracy], 
-                    feed_dict={self.x : self.testData, self.labels : self.testlabels})
+                    feed_dict={self.x : self.valData, self.labels : self.vallabels})
         self.test_writer.add_summary(summary, index)
         return acc
             
@@ -138,19 +167,26 @@ class CNNModel(object):
         if (start < len(self.trainData)):
             yield self.trainData[start:], self.trainlabels[start:]
         
-            
-    
-
+    def runPredict(self):
+        summary, acc = self.sess.run(
+                    [self.merged, self.accuracy], 
+                    feed_dict={self.x : self.testData, self.labels : self.testlabels})
+        print('Model test accuracy: {}'.format(acc))
+        self.test_writer.add_summary(summary)
+        
 class Config():
-    def __init__(self):
-        pass
+    batchSize = 100
+    nTrainData = 55000
+    nEpoch = 40
+    nEpochsWithoutImprov = 4
     
     dropoutVal = 0.5
     lossRate = 0.001
-    batchSize = 100
-    nTrainData = 55000
     modelOptimizer = 'adam'
-    nEpoch = 35
+    lossRateDecay = 0.95
+    trainValSplit = 0.9
+    
+    saveModelFile = 'yolo'
     
     
 if __name__ == '__main__':
