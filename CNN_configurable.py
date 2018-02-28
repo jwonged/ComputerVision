@@ -78,7 +78,8 @@ class CNNModel(object):
         
         with tf.variable_scope('Pred'):
             correct_prediction = tf.equal(tf.argmax(self.y, 1), self.labels)
-            self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')
+            self.accuracy = tf.reduce_mean(
+                tf.cast(correct_prediction, tf.float32), name='accuracy')
         tf.summary.scalar('Pred', self.accuracy)
         
         self._initSession()
@@ -134,7 +135,7 @@ class CNNModel(object):
         
     def run_epoch(self):
         for index, (x,labels) in enumerate(self._getNextBatch(self.config.batchSize)):
-            if (index % 10 == 0):
+            if (index % 100 == 0):
                 summary, acc = self.sess.run(
                     [self.merged, self.accuracy], 
                     feed_dict={self.x : self.valData, 
@@ -160,8 +161,6 @@ class CNNModel(object):
         return acc
             
     def _getNextBatch(self, batchSize):
-        print('Number of training data points: {}'.format(len(self.trainData)))
-        print('Number of val data points: {}'.format(len(self.valData)))
         start = 0
         end = start + batchSize
         while (end < len(self.trainData)):
@@ -188,10 +187,10 @@ class CNNModel(object):
         saver.restore(self.sess, tf.train.latest_checkpoint(self.config.restoreModelPath))
         
         graph = tf.get_default_graph()
-        self.accuracy = graph.get_tensor_by_name('accuracy:0')
         self.x = graph.get_tensor_by_name('img-input:0')
         self.labels = graph.get_tensor_by_name('label-input:0')
         self.dropout = graph.get_tensor_by_name('dropout:0')
+        self.accuracy = graph.get_tensor_by_name('accuracy:0')
         self.saver = tf.train.Saver()
         
         
