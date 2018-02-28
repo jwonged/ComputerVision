@@ -186,7 +186,7 @@ class CNNModel(object):
         if (start < len(self.trainData)):
             yield self.trainData[start:], self.trainlabels[start:]
         
-    def runPredict(self):
+    def runPredict(self, testData, testlabels):
         #restore highest scoring model
         self.restoreModel()
         acc = self.sess.run([self.accuracy], 
