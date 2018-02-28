@@ -127,8 +127,8 @@ class CNNTransferModel(object):
         count = 0
         print(np.asarray(images).shape)
         for imagevec in images:
-            vec = [[imagevec], [imagevec], [imagevec]]
-            print(np.asarray(vec).shape)
+            input_image = caffe.io.load_image('/home/joshua/Documents/Experiments/ComputerVision/resource/mnist-2.png')
+            print(np.asarray(input_image).shape)
             prediction = net.predict([imagevec], oversample=False)
             msg = ('image {} : {} ( {} )'.format(count,
                                                  labels[prediction[0].argmax()].strip(), 
@@ -230,7 +230,7 @@ class Config():
     imagenet_labels = caffe_root + 'data/ilsvrc12/synset_words.txt'
     mean_path = caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy'
     layer_name = 'fc7'
-    
+
 def main():
     # Load training and eval data
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
