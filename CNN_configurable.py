@@ -117,7 +117,7 @@ class CNNModel(object):
         
         print('Initializing model...')
     
-    def train(self, trainData, trainlabels):
+    def train(self, trainData, trainlabels, testData, testlabels):
         print('Starting training')
         splitIndex = int(round(len(trainData)*self.config.trainValSplit))
         self.trainData = trainData[:splitIndex]
@@ -146,7 +146,7 @@ class CNNModel(object):
                             nEpoch+1, nEpochWithoutImprovement))
                     break
         
-        self.runPredict()
+        self.runPredict(testData, testlabels, restore=False)
         
     def run_epoch(self):
         for index, (x,labels) in enumerate(self._getNextBatch(self.config.batchSize)):
@@ -186,14 +186,15 @@ class CNNModel(object):
         if (start < len(self.trainData)):
             yield self.trainData[start:], self.trainlabels[start:]
         
-    def runPredict(self, testData, testlabels):
+    def runPredict(self, testData, testlabels, restore=False):
         #restore highest scoring model
-        self.restoreModel()
+        if restore:
+            self.restoreModel()
         acc = self.sess.run([self.accuracy], 
                             feed_dict={self.x : testData, 
                                        self.labels : testlabels,
                                        self.dropout : 1.0})
-        print('Model test accuracy: {}'.format(acc))
+        print('Model test accuracy: {:>6.1%}'.format(acc))
     
     def restoreModel(self):
         print('restoring model from {}'.format(self.config.restoreModel))
@@ -211,23 +212,34 @@ class CNNModel(object):
         
 
 def main():
-    # Load training and eval data
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_data = mnist.train.images  # Returns np.array
+    train_data = mnist.train.images  
     train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
-    eval_data = mnist.test.images  # Returns np.array
+    eval_data = mnist.test.images 
     eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
     
     config = Config()
     model = CNNModel(config)
-    #model.constructModel()    
-    #model.train(train_data, train_labels)
+    model.constructModel()    
+    model.train(train_data, train_labels, eval_data, eval_labels)
+
+def predict():
+    mnist = tf.contrib.learn.datasets.load_dataset("mnist")
+    eval_data = mnist.test.images 
+    eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
+    config = Config()
+    model = CNNModel(config)
+    model.runPredict(eval_data, eval_labels, restore=True)
+    
+    
     
     #predictModel = CNNModel(config)
-    model.runPredict(eval_data, eval_labels)
     
 if __name__ == '__main__':
-    main()
+    if (sys.argv[1] == '-pred'):
+        predict()
+    else:
+        main()
     
     
     
