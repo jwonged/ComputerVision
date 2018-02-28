@@ -190,7 +190,7 @@ class CNNModel(object):
         #restore highest scoring model
         if restore:
             self.restoreModel()
-        acc = self.sess.run([self.accuracy], 
+        acc = self.sess.run(self.accuracy, 
                             feed_dict={self.x : testData, 
                                        self.labels : testlabels,
                                        self.dropout : 1.0})
@@ -238,8 +238,11 @@ def predict():
 if __name__ == '__main__':
     if (sys.argv[1] == '-pred'):
         predict()
-    else:
+    elif (sys.argv[1] == '-train'):
         main()
+    else:
+        print("Run with: python {} <option>\n <option>: '-train' or '-pred'".format(
+            sys.argv[0]))
     
     
     
