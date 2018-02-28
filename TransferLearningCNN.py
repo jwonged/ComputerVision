@@ -126,8 +126,7 @@ class CNNTransferModel(object):
         result = []
         count = 0
         for imagevec in images:
-            imagevec = np.reshape(imagevec, [-1, 28*28, 1,1])
-            prediction = net.predict([imagevec], oversample=False)
+            prediction = net.predict([imagevec, imagevec, imagevec], oversample=False)
             msg = ('image {} : {} ( {} )'.format(count,
                                                  labels[prediction[0].argmax()].strip(), 
                                                  prediction[0][prediction[0].argmax()]))
