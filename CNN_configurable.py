@@ -75,12 +75,6 @@ class CNNModel(object):
                                           kernel_initializer=tf.contrib.layers.xavier_initializer())
             if (self.config.dropoutVal < 1.0):
                 fcLayer1 = tf.nn.dropout(fcLayer1, self.dropout)
-            fcLayer1 = tf.layers.dense(inputs=fcLayer1, 
-                                          units=1024, 
-                                          activation=tf.nn.relu,
-                                          kernel_initializer=tf.contrib.layers.xavier_initializer())
-            if (self.config.dropoutVal < 1.0):
-                fcLayer1 = tf.nn.dropout(fcLayer1, self.dropout)
             self.y = tf.layers.dense(inputs=fcLayer1, units=10)
             
         with tf.variable_scope('loss'):
