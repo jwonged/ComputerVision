@@ -190,8 +190,8 @@ class CNNModel(object):
         #restore highest scoring model
         self.restoreModel()
         acc = self.sess.run([self.accuracy], 
-                            feed_dict={self.x : self.testData, 
-                                       self.labels : self.testlabels,
+                            feed_dict={self.x : testData, 
+                                       self.labels : testlabels,
                                        self.dropout : 1.0})
         print('Model test accuracy: {}'.format(acc))
     
