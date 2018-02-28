@@ -153,7 +153,9 @@ class CNNModel(object):
             
         summary, acc = self.sess.run(
                     [self.merged, self.accuracy], 
-                    feed_dict={self.x : self.valData, self.labels : self.vallabels})
+                    feed_dict={self.x : self.valData, 
+                               self.labels : self.vallabels,
+                               self.dropout : 1.0})
         self.test_writer.add_summary(summary, index)
         return acc
             
@@ -173,7 +175,9 @@ class CNNModel(object):
     def runPredict(self):
         summary, acc = self.sess.run(
                     [self.merged, self.accuracy], 
-                    feed_dict={self.x : self.testData, self.labels : self.testlabels})
+                    feed_dict={self.x : self.testData, 
+                               self.labels : self.testlabels,
+                               self.dropout : 1.0})
         print('Model test accuracy: {}'.format(acc))
         self.test_writer.add_summary(summary)
         
