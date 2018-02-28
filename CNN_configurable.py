@@ -20,10 +20,11 @@ class CNNModel(object):
         self.config = config
         self.sess = None
         self.saver = None
-        self.trainData = trainData[:len(trainData)*self.config.trainValSplit]
-        self.trainlabels = trainlabels[:len(trainData)*self.config.trainValSplit]
-        self.valData = trainData[len(trainData) * self.config.trainValSplit:]
-        self.vallabels = trainlabels[len(trainData)*self.config.trainValSplit:]
+        splitIndex = int(round(len(trainData)*self.config.trainValSplit))
+        self.trainData = trainData[:splitIndex]
+        self.trainlabels = trainlabels[:splitIndex]
+        self.valData = trainData[splitIndex:]
+        self.vallabels = trainlabels[splitIndex:]
         self.testData = eval_data
         self.testlabels =  eval_labels
     
@@ -157,6 +158,8 @@ class CNNModel(object):
         return acc
             
     def _getNextBatch(self, batchSize):
+        print('Number of training data points: {}'.format(len(self.trainData)))
+        print('Number of val data points: {}'.format(len(self.valData)))
         start = 0
         end = start + batchSize
         while (end < len(self.trainData)):
