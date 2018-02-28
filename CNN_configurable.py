@@ -137,10 +137,10 @@ class Config():
         pass
     
     dropoutVal = 0.5
-    lossRate = 0.01
+    lossRate = 0.001
     batchSize = 100
     nTrainData = 55000
-    modelOptimizer = 'gradDesc'
+    modelOptimizer = 'adam'
     
     
 if __name__ == '__main__':
