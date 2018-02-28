@@ -122,7 +122,7 @@ class CNNTransferModel(object):
         # Loading class labels
         with open(self.config.imagenet_labels) as f:
             labels = f.readlines()
-        caffe.io.load(color=False)
+        caffe.io.load_image(color=False)
         result = []
         count = 0
         for imagevec in images:
