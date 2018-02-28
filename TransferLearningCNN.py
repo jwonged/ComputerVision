@@ -129,7 +129,6 @@ class CNNTransferModel(object):
         for imagevec in images:
             vec = [[imagevec], [imagevec], [imagevec]]
             print(np.asarray(vec).shape)
-            vec = np.reshape(vec, [-1, 784, 784, 784])
             prediction = net.predict([imagevec], oversample=False)
             msg = ('image {} : {} ( {} )'.format(count,
                                                  labels[prediction[0].argmax()].strip(), 
