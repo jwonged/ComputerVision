@@ -103,7 +103,7 @@ class CNNModel(object):
         print('Initializing model...')
     
     def train(self):
-        for i in self.config.nEpoch:
+        for i in range(self.config.nEpoch):
             acc = self.run_epoch()
             print('Epoch {} accuracy: {}'.format(i,acc))
         
