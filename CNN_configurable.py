@@ -111,7 +111,7 @@ class CNNModel(object):
                     feed_dict={self.x : self.testData, self.labels : self.testlabels})
                 self.test_writer.add_summary(summary, index)
                 print('Accuracy at batch {} : {}'.format(index, acc))
-            self.y, summary, _ = self.sess.run(
+            _, summary, _ = self.sess.run(
                 [self.y, self.merged, self.train_op], 
                 feed_dict={self.x : x, self.labels : labels})
             self.train_writer.add_summary(summary, index)
