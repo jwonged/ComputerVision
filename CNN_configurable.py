@@ -112,10 +112,11 @@ class CNNModel(object):
                 self.test_writer.add_summary(summary, index)
                 print('Accuracy at batch {} : {}'.format(index, acc))
             print('Batch {} completed'.format(index))
-            summary, _ = self.sess.run(
-                [self.merged, self.train_op], 
+            self.y, summary, _ = self.sess.run(
+                [self.y, self.merged, self.train_op], 
                 feed_dict={self.x : x, self.labels : labels})
             self.train_writer.add_summary(summary, index)
+            
             
     def _getNextBatch(self, batchSize):
         start = 0
@@ -136,7 +137,7 @@ class Config():
         pass
     
     dropoutVal = 0.5
-    lossRate = 0.001
+    lossRate = 0.01
     batchSize = 100
     nTrainData = 55000
     modelOptimizer = 'gradDesc'
@@ -152,7 +153,7 @@ if __name__ == '__main__':
     
     config = Config()
     model = CNNModel(config, train_data, train_labels, eval_data, eval_labels)
-    model.constructModel()
+    model.constructModel()    
     model.train()
     
     
