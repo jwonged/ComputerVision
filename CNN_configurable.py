@@ -103,6 +103,11 @@ class CNNModel(object):
         print('Initializing model...')
     
     def train(self):
+        for i in self.config.nEpoch:
+            acc = self.run_epoch()
+            print('Epoch {} accuracy: {}'.format(i,acc))
+        
+    def run_epoch(self):
         print('Starting training')
         for index, (x,labels) in enumerate(self._getNextBatch(self.config.batchSize)):
             if (index % 10 == 0):
@@ -110,13 +115,17 @@ class CNNModel(object):
                     [self.merged, self.accuracy], 
                     feed_dict={self.x : self.testData, self.labels : self.testlabels})
                 self.test_writer.add_summary(summary, index)
-                print('Accuracy at batch {} : {}'.format(index, acc))
+                print('Accuracy at batch {} : {1:>6.1%}'.format(index, acc))
             _, summary, _ = self.sess.run(
                 [self.y, self.merged, self.train_op], 
                 feed_dict={self.x : x, self.labels : labels})
             self.train_writer.add_summary(summary, index)
-            print('Batch {} completed'.format(index))
             
+        summary, acc = self.sess.run(
+                    [self.merged, self.accuracy], 
+                    feed_dict={self.x : self.testData, self.labels : self.testlabels})
+        self.test_writer.add_summary(summary, index)
+        return acc
             
     def _getNextBatch(self, batchSize):
         start = 0
@@ -141,6 +150,7 @@ class Config():
     batchSize = 100
     nTrainData = 55000
     modelOptimizer = 'adam'
+    nEpoch = 35
     
     
 if __name__ == '__main__':
