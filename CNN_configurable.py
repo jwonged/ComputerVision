@@ -206,7 +206,7 @@ class CNNModel(object):
         self.dropout = graph.get_tensor_by_name('dropout:0')
         self.x = graph.get_tensor_by_name('img-input:0')
         self.labels = graph.get_tensor_by_name('label-input:0')
-        self.accuracy = graph.get_tensor_by_name('accuracy:0')
+        self.accuracy = graph.get_tensor_by_name('Pred/accuracy:0')
         self.saver = tf.train.Saver()
         
 
