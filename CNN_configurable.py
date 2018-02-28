@@ -193,7 +193,7 @@ class Config():
     lossRateDecay = 0.95
     trainValSplit = 0.9
     
-    saveModelFile = 'yolo'
+    saveModelFile = './'
     
     
 if __name__ == '__main__':
