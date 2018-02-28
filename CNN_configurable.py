@@ -70,8 +70,12 @@ class CNNModel(object):
             
         with tf.variable_scope('fc_layers'):
             fcLayer1 = tf.layers.dense(inputs=pool2_flat, 
+                                          units=2048, 
+                                          activation=tf.nn.tanh,
+                                          kernel_initializer=tf.contrib.layers.xavier_initializer())
+            fcLayer1 = tf.layers.dense(inputs=fcLayer1, 
                                           units=1024, 
-                                          activation=tf.nn.relu,
+                                          activation=tf.nn.tanh,
                                           kernel_initializer=tf.contrib.layers.xavier_initializer())
             if (self.config.dropoutVal < 1.0):
                 fcLayer1 = tf.nn.dropout(fcLayer1, self.dropout)
@@ -236,13 +240,17 @@ def predict():
     #predictModel = CNNModel(config)
     
 if __name__ == '__main__':
+    if (len(sys.argv) < 1):
+        print("Run with: python {} <option>\n <option>: '-train' or '-pred'".format(
+            sys.argv[0]))
+        
     if (sys.argv[1] == '-pred'):
         predict()
     elif (sys.argv[1] == '-train'):
         main()
     else:
-        print("Run with: python {} <option>\n <option>: '-train' or '-pred'".format(
-            sys.argv[0]))
+        print('Run options: -pred or -train')
+        
     
     
     

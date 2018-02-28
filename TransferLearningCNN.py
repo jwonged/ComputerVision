@@ -25,11 +25,11 @@ class CNNTransferModel(object):
         self.sess = None
         self.saver = None
         splitIndex = int(round(len(trainData)*self.config.trainValSplit))
-        self.trainData = self._preprocess(trainData[:splitIndex])
+        self.trainData = self._preprocessImages(trainData[:splitIndex])
         self.trainlabels = trainlabels[:splitIndex]
-        self.valData = self._preprocess(trainData[splitIndex:])
+        self.valData = self._preprocessImages(trainData[splitIndex:])
         self.vallabels = trainlabels[splitIndex:]
-        self.testData = self._preprocess(eval_data)
+        self.testData = self._preprocessImages(eval_data)
         self.testlabels =  eval_labels
     
     def constructModel(self):
@@ -111,7 +111,7 @@ class CNNTransferModel(object):
         
         self.runPredict()
     
-    def preprocessImages(self, images):
+    def _preprocessImages(self, images):
         sys.path.insert(0, self.config.caffe_root + 'python')
         caffe.set_mode_gpu()
         net = caffe.Classifier(self.config.model_prototxt, self.config.model_trained,
@@ -137,9 +137,6 @@ class CNNTransferModel(object):
             print(np.asarray(featureData).shape)
             if (count == 1):
                 break
-        
-        
-        
         
         
     def run_epoch(self):
