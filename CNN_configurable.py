@@ -204,7 +204,7 @@ class CNNModel(object):
         saver.restore(self.sess, tf.train.latest_checkpoint(self.config.restoreModelPath))
         
         graph = tf.get_default_graph()
-        self.x = graph.get_tensor_by_name('img-input')
+        self.x = graph.get_tensor_by_name('img-input:0')
         self.labels = graph.get_tensor_by_name('label-input:0')
         self.dropout = graph.get_tensor_by_name('dropout:0')
         self.accuracy = graph.get_tensor_by_name('accuracy:0')
