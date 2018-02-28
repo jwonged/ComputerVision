@@ -131,7 +131,6 @@ class CNNModel(object):
                             nEpoch+1, nEpochWithoutImprovement))
                     break
         
-        self.runPredict()
         
     def run_epoch(self):
         for index, (x,labels) in enumerate(self._getNextBatch(self.config.batchSize)):
@@ -224,6 +223,9 @@ if __name__ == '__main__':
     model.constructModel()    
     model.train()
     
+    predictModel = CNNModel(config, train_data, train_labels, eval_data, eval_labels)
+    model.restoreModel()
+    model.runPredict()
     
     
     
