@@ -204,7 +204,7 @@ class CNNModel(object):
         saver.restore(self.sess, tf.train.latest_checkpoint(self.config.restoreModelPath))
         
         graph = tf.get_default_graph()
-        self.x = graph.get_tensor_by_name('img-input:0')
+        self.x = graph.get_tensor_by_name('img-input')
         self.labels = graph.get_tensor_by_name('label-input:0')
         self.dropout = graph.get_tensor_by_name('dropout:0')
         self.accuracy = graph.get_tensor_by_name('accuracy:0')
@@ -221,8 +221,9 @@ def main():
     
     config = Config()
     model = CNNModel(config, train_data, train_labels, eval_data, eval_labels)
-    model.constructModel()    
-    model.train()
+    model.runPredict()
+    #model.constructModel()    
+    #model.train()
     
 if __name__ == '__main__':
     main()
