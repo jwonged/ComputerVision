@@ -29,7 +29,7 @@ class Config():
     trainValSplit = 0.9
     
     saveModelFile = './yolo'
-    restoreModelPath = './yolo'
+    restoreModelPath = '/home/joshua/Documents/Experiments/ComputerVision/'
     restoreModel = './yolo.meta'
 
 class CNNModel(object):
