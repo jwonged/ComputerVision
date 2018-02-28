@@ -46,11 +46,10 @@ class CNNModel(object):
         self.testlabels =  eval_labels
     
     def constructModel(self):
-        with tf.name_scope('input'):
-            self.x = tf.placeholder(tf.float32, [None, 784], name='img-input')
-            self.labels = tf.placeholder(tf.int64, [None], name='label-input')
-            self.lr = tf.placeholder(dtype=tf.float32, shape=[], name="lr")
-            self.dropout = tf.placeholder(dtype=tf.float32, shape=[], name="dropout")
+        self.x = tf.placeholder(tf.float32, [None, 784], name='img-input')
+        self.labels = tf.placeholder(tf.int64, [None], name='label-input')
+        self.lr = tf.placeholder(dtype=tf.float32, shape=[], name="lr")
+        self.dropout = tf.placeholder(dtype=tf.float32, shape=[], name="dropout")
             
         with tf.name_scope('input_reshape'):
             shaped_x = tf.reshape(self.x, [-1, 28, 28, 1])
@@ -204,9 +203,9 @@ class CNNModel(object):
         self.saver.restore(self.sess, tf.train.latest_checkpoint('./'))
         
         graph = tf.get_default_graph()
+        self.dropout = graph.get_tensor_by_name('dropout:0')
         self.x = graph.get_tensor_by_name('img-input:0')
         self.labels = graph.get_tensor_by_name('label-input:0')
-        self.dropout = graph.get_tensor_by_name('dropout:0')
         self.accuracy = graph.get_tensor_by_name('accuracy:0')
         self.saver = tf.train.Saver()
         
@@ -221,9 +220,8 @@ def main():
     
     config = Config()
     model = CNNModel(config, train_data, train_labels, eval_data, eval_labels)
-    model.runPredict()
-    #model.constructModel()    
-    #model.train()
+    model.constructModel()    
+    model.train()
     
 if __name__ == '__main__':
     main()
