@@ -29,7 +29,7 @@ class Config():
     trainValSplit = 0.9
     
     saveModelFile = './yolo'
-    restoreModelPath = '/home/joshua/Documents/Experiments/ComputerVision/'
+    restoreModelPath = './'
     restoreModel = './yolo.meta'
 
 class CNNModel(object):
@@ -200,8 +200,8 @@ class CNNModel(object):
     def restoreModel(self):
         print('restoring model from {}'.format(self.config.restoreModel))
         self.sess = tf.Session()
-        self.saver = saver = tf.train.import_meta_graph(self.config.restoreModel)
-        saver.restore(self.sess, tf.train.latest_checkpoint(self.config.restoreModelPath))
+        self.saver = tf.train.import_meta_graph('./yolo.meta')
+        self.saver.restore(self.sess, tf.train.latest_checkpoint('./'))
         
         graph = tf.get_default_graph()
         self.x = graph.get_tensor_by_name('img-input:0')
