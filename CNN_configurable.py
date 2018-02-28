@@ -196,13 +196,13 @@ class CNNModel(object):
         print('Model test accuracy: {}'.format(acc))
     
     def restoreModel(self):
-        tf.reset_default_graph
         print('restoring model from {}'.format(self.config.restoreModel))
         self.sess = tf.Session()
         self.saver = tf.train.import_meta_graph('./yolo.meta')
         self.saver.restore(self.sess, tf.train.latest_checkpoint('./'))
         
         graph = tf.get_default_graph()
+        tf.reset_default_graph
         self.dropout = graph.get_tensor_by_name('dropout:0')
         self.x = graph.get_tensor_by_name('img-input:0')
         self.labels = graph.get_tensor_by_name('label-input:0')
