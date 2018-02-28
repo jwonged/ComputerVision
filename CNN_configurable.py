@@ -14,8 +14,25 @@ import sys
 
 import tensorflow as tf
 import numpy as np
-class CNNModel(object):
 
+class Config():
+    #99.3% accuracy
+    batchSize = 100
+    nTrainData = 55000
+    nEpoch = 40
+    nEpochsWithoutImprov = 4
+    
+    dropoutVal = 0.5
+    lossRate = 0.001
+    modelOptimizer = 'adam'
+    lossRateDecay = 0.95
+    trainValSplit = 0.9
+    
+    saveModelFile = './yolo'
+    restoreModelPath = './yolo'
+    restoreModel = './yolo.meta'
+
+class CNNModel(object):
     def __init__(self, config, trainData, trainlabels, eval_data, eval_labels):
         self.config = config
         self.sess = None
@@ -131,6 +148,7 @@ class CNNModel(object):
                             nEpoch+1, nEpochWithoutImprovement))
                     break
         
+        self.runPredict()
         
     def run_epoch(self):
         for index, (x,labels) in enumerate(self._getNextBatch(self.config.batchSize)):
@@ -192,25 +210,8 @@ class CNNModel(object):
         self.accuracy = graph.get_tensor_by_name('accuracy:0')
         self.saver = tf.train.Saver()
         
-        
-class Config():
-    #99.3% accuracy
-    batchSize = 100
-    nTrainData = 55000
-    nEpoch = 40
-    nEpochsWithoutImprov = 4
-    
-    dropoutVal = 0.5
-    lossRate = 0.001
-    modelOptimizer = 'adam'
-    lossRateDecay = 0.95
-    trainValSplit = 0.9
-    
-    saveModelFile = './yolo'
-    restoreModelPath = './'
-    restoreModel = './yolo.meta'
-    
-if __name__ == '__main__':
+
+def main():
     # Load training and eval data
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
     train_data = mnist.train.images  # Returns np.array
@@ -223,9 +224,8 @@ if __name__ == '__main__':
     model.constructModel()    
     model.train()
     
-    predictModel = CNNModel(config, train_data, train_labels, eval_data, eval_labels)
-    model.restoreModel()
-    model.runPredict()
+if __name__ == '__main__':
+    main()
     
     
     
