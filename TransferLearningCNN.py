@@ -122,10 +122,11 @@ class CNNTransferModel(object):
         # Loading class labels
         with open(self.config.imagenet_labels) as f:
             labels = f.readlines()
-        caffe.io.load_image(color=False)
+            
         result = []
         count = 0
         for imagevec in images:
+            imagevec = np.reshape(imagevec, [-1, 28*28, 1,1])
             prediction = net.predict([imagevec], oversample=False)
             msg = ('image {} : {} ( {} )'.format(count,
                                                  labels[prediction[0].argmax()].strip(), 
