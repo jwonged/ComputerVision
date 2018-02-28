@@ -78,7 +78,7 @@ class CNNModel(object):
         
         with tf.variable_scope('Pred'):
             correct_prediction = tf.equal(tf.argmax(self.y, 1), self.labels)
-            self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+            self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')
         tf.summary.scalar('Pred', self.accuracy)
         
         self._initSession()
@@ -175,13 +175,11 @@ class CNNModel(object):
     def runPredict(self):
         #restore highest scoring model
         self.restoreModel()
-        summary, acc = self.sess.run(
-                    [self.merged, self.accuracy], 
-                    feed_dict={self.x : self.testData, 
-                               self.labels : self.testlabels,
-                               self.dropout : 1.0})
+        acc = self.sess.run([self.accuracy], 
+                            feed_dict={self.x : self.testData, 
+                                       self.labels : self.testlabels,
+                                       self.dropout : 1.0})
         print('Model test accuracy: {}'.format(acc))
-        self.test_writer.add_summary(summary)
     
     def restoreModel(self):
         print('restoring model from {}'.format(self.config.restoreModel))
