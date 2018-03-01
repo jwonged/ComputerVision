@@ -91,6 +91,7 @@ class CNNTransferModel(object):
         print('Feature extraction for training data completed.')
         self.vallabels = trainlabels[splitIndex:]
         
+        self.constructModel()
         print('Starting training')
         highestScore = 0
         nEpochWithoutImprovement = 0
@@ -144,7 +145,7 @@ class CNNTransferModel(object):
             count = count + 1
             featureData = net.blobs[self.config.layer_name].data[0].reshape(1,-1).tolist()
             print(featureData)
-            #result.append(featureData)
+            result.append(featureData)
         
         return result
         
@@ -245,7 +246,6 @@ def main():
     
     config = Config()
     model = CNNTransferModel(config)
-    model.constructModel()    
     model.train(train_data, train_labels, eval_data, eval_labels)
 
 def predict():
