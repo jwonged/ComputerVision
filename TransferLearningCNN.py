@@ -114,8 +114,8 @@ class CNNTransferModel(object):
     def _preprocessImages(self, images):
         sys.path.insert(0, self.config.caffe_root + 'python')
         caffe.set_mode_gpu()
-        net = caffe.Classifier(self.config.model_prototxt, self.config.model_trained,
-                           mean=np.load(self.config.mean_path).mean(1).mean(1), #channel_swap=(2,1,0),
+        net = caffe.Classifier(self.config.model_prototxt, self.config.model_trained, #mean=np.load(self.config.mean_path).mean(1).mean(1), 
+                           channel_swap=(2,1,0),
                            raw_scale=255,
                            image_dims=(28, 28))
         
