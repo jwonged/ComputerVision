@@ -12,6 +12,7 @@ import sys
 import tensorflow as tf
 import numpy as np
 import caffe
+import pickle
 
 class CNNTransferModel(object):
     '''
@@ -79,17 +80,35 @@ class CNNTransferModel(object):
         
         print('Initializing model...')
     
-    def train(self, trainData, trainlabels, testData, testlabels):
-        print('Preprocessing images...')
-        splitIndex = int(round(len(trainData)*self.config.trainValSplit))
-        
-        self.trainData = self._preprocessImages(trainData[:splitIndex])
-        print('Feature extraction for training data completed.')
-        self.trainlabels = trainlabels[:splitIndex]
-        
-        self.valData = self._preprocessImages(trainData[splitIndex:])
-        print('Feature extraction for training data completed.')
-        self.vallabels = trainlabels[splitIndex:]
+    def train(self, trainData, trainlabels, testData, testlabels, load=False):
+        if load:
+            print('Reading ' + self.config.preprocessedFile)
+            with open(self.config.preprocessedFile, 'rb') as f:
+                data = pickle.load(f)
+            self.trainData = data['trainData']
+            self.trainlabels = data['trainlabels']
+            self.valData = data['valData']
+            self.vallabels = data['vallabels']
+        else:
+            print('Preprocessing images...')
+            splitIndex = int(round(len(trainData)*self.config.trainValSplit))
+            
+            self.trainData = self._preprocessImages(trainData[:splitIndex])
+            print('Feature extraction for training data completed.')
+            self.trainlabels = trainlabels[:splitIndex]
+            
+            self.valData = self._preprocessImages(trainData[splitIndex:])
+            print('Feature extraction for training data completed.')
+            self.vallabels = trainlabels[splitIndex:]
+            
+            with open(self.config.preprocessedFile, 'wb') as f:
+                data = {}
+                data['trainData'] = self.trainData
+                data['trainlabels'] = self.trainlabels
+                data['valData'] = self.valData
+                data['vallabels'] = self.vallabels 
+                pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+                print('Saved to {}'.format(self.config.preprocessedFile))
         
         self.constructModel()
         print('Starting training')
@@ -143,7 +162,8 @@ class CNNTransferModel(object):
                                                  prediction[0][prediction[0].argmax()]))
             print(msg)
             count = count + 1
-            featureData = net.blobs[self.config.layer_name].data[0].reshape(1,-1).tolist()
+            featureData = net.blobs[self.config.layer_name].data[0].reshape(1,-1).tolist()[0]
+            print(np.asarray(featureData).shape)
             result.append(featureData)
         
         return result
@@ -228,6 +248,7 @@ class Config():
     saveModelFile = './yolo'
     restoreModelPath = './'
     restoreModel = './yolo.meta'
+    preprocessedFile = './preprocessedDataStuff.pkl'
     
     caffe_root = '/home/joshua/caffe/'
     model_prototxt = caffe_root + 'models/211839e770f7b538e2d8/VGG_ILSVRC_19_layers_deploy.prototxt'
@@ -236,7 +257,7 @@ class Config():
     mean_path = caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy'
     layer_name = 'fc7'
 
-def main():
+def main(load):
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
     train_data = mnist.train.images  
     train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
@@ -245,7 +266,7 @@ def main():
     
     config = Config()
     model = CNNTransferModel(config)
-    model.train(train_data, train_labels, eval_data, eval_labels)
+    model.train(train_data, train_labels, eval_data, eval_labels, load)
 
 def predict():
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
@@ -258,14 +279,16 @@ def predict():
     
 if __name__ == '__main__':
     if (len(sys.argv) < 1):
-        print("Run with: python {} <option>\n <option>: '-train' or '-pred'".format(
+        print("Run with: python {} <option>\n <option>: '-train' or '-pred' or 'loadtrain'".format(
             sys.argv[0]))
         
     if (sys.argv[1] == '-pred'):
         predict()
     elif (sys.argv[1] == '-train'):
-        main()
+        main(False)
+    elif (sys.argv[1] == '-loadtrain'):
+        main(True)
     else:
-        print('Run options: -pred or -train')
+        print('Run options: -pred or -train or -loadtrain')
     
     
