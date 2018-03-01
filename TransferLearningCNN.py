@@ -128,7 +128,7 @@ class CNNTransferModel(object):
         print(np.asarray(images).shape)
         for imagevec in images:
             input_image = caffe.io.load_image(
-                '/home/joshua/Documents/Experiments/ComputerVision/resource/mnist-2.png', color=False)
+                '/home/joshua/Documents/Experiments/ComputerVision/resource/mnist-2.png')
             #imagevec = np.repeat(imagevec,3)
             #print(imagevec)
             #print(np.asarray(imagevec).shape)
