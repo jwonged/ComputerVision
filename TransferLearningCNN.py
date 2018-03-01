@@ -117,7 +117,7 @@ class CNNTransferModel(object):
         net = caffe.Classifier(self.config.model_prototxt, self.config.model_trained, #mean=np.load(self.config.mean_path).mean(1).mean(1), 
                            channel_swap=(2,1,0),
                            raw_scale=255,
-                           image_dims=(28, 28))
+                           image_dims=(224, 224))
         
         # Loading class labels
         with open(self.config.imagenet_labels) as f:
