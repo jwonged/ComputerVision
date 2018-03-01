@@ -143,7 +143,8 @@ class CNNTransferModel(object):
             print(msg)
             count = count + 1
             featureData = net.blobs[self.config.layer_name].data[0].reshape(1,-1).tolist()
-            result.append(featureData)
+            print(featureData)
+            #result.append(featureData)
         
         return result
         
