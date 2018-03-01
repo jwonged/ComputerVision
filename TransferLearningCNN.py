@@ -129,12 +129,12 @@ class CNNTransferModel(object):
         for imagevec in images:
             input_image = caffe.io.load_image(
                 '/home/joshua/Documents/Experiments/ComputerVision/resource/mnist-2.png')
-            #imagevec = np.repeat(imagevec,3)
-            #print(imagevec)
-            #print(np.asarray(imagevec).shape)
-            #imagevec = np.reshape(imagevec, [28,28,3])
+            imagevec = np.repeat(imagevec,3)
+            print(imagevec)
+            print(np.asarray(imagevec).shape)
+            imagevec = np.reshape(imagevec, [28,28,3])
             print(np.asarray(input_image).shape)
-            prediction = net.predict(input_image, oversample=False)
+            prediction = net.predict([imagevec], oversample=False)
             
             msg = ('image {} : {} ( {} )'.format(count,
                                                  labels[prediction[0].argmax()].strip(), 
