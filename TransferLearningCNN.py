@@ -7,8 +7,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
-import os
 import sys
 
 import tensorflow as tf
@@ -20,21 +18,14 @@ class CNNTransferModel(object):
     Attempting transfer learning on mnist dataset
     With VGGnet pre-trained on imagenet
     '''
-    def __init__(self, config, trainData, trainlabels, eval_data, eval_labels):
+    def __init__(self, config):
         self.config = config
         self.sess = None
         self.saver = None
-        splitIndex = int(round(len(trainData)*self.config.trainValSplit))
-        self.trainData = self._preprocessImages(trainData[:splitIndex])
-        self.trainlabels = trainlabels[:splitIndex]
-        self.valData = self._preprocessImages(trainData[splitIndex:])
-        self.vallabels = trainlabels[splitIndex:]
-        self.testData = self._preprocessImages(eval_data)
-        self.testlabels =  eval_labels
     
     def constructModel(self):
         with tf.name_scope('input'):
-            self.x = tf.placeholder(tf.float32, [None, 784], name='img-input')
+            self.x = tf.placeholder(tf.float32, [None, 4096], name='img-input')
             self.labels = tf.placeholder(tf.int64, [None], name='label-input')
             self.lr = tf.placeholder(dtype=tf.float32, shape=[], name="lr")
             self.dropout = tf.placeholder(dtype=tf.float32, shape=[], name="dropout")
@@ -87,7 +78,14 @@ class CNNTransferModel(object):
         
         print('Initializing model...')
     
-    def train(self):
+    def train(self, trainData, trainlabels, testData, testlabels):
+        print('Preprocessing images...')
+        splitIndex = int(round(len(trainData)*self.config.trainValSplit))
+        self.trainData = self._preprocessImages(trainData[:splitIndex])
+        self.trainlabels = trainlabels[:splitIndex]
+        self.valData = self._preprocessImages(trainData[splitIndex:])
+        self.vallabels = trainlabels[splitIndex:]
+        
         print('Starting training')
         highestScore = 0
         nEpochWithoutImprovement = 0
@@ -109,9 +107,10 @@ class CNNTransferModel(object):
                             nEpoch+1, nEpochWithoutImprovement))
                     break
         
-        self.runPredict()
+        self.runPredict(testData, testlabels, restore=False)
     
     def _preprocessImages(self, images):
+        #Preprocess images into 4096 dimension vectors
         sys.path.insert(0, self.config.caffe_root + 'python')
         caffe.set_mode_gpu()
         net = caffe.Classifier(self.config.model_prototxt, self.config.model_trained, #mean=np.load(self.config.mean_path).mean(1).mean(1), 
@@ -125,13 +124,8 @@ class CNNTransferModel(object):
             
         result = []
         count = 0
-        print(np.asarray(images).shape)
         for imagevec in images:
-            #input_image = caffe.io.load_image(
-            #    '/home/joshua/Documents/Experiments/ComputerVision/resource/mnist-2.png')
             imagevec = np.repeat(imagevec,3)
-            print(imagevec)
-            print(np.asarray(imagevec).shape)
             imagevec = np.reshape(imagevec, [28,28,3])
             print(np.asarray(imagevec).shape)
             #print(np.asarray(input_image).shape)
@@ -140,18 +134,18 @@ class CNNTransferModel(object):
             msg = ('image {} : {} ( {} )'.format(count,
                                                  labels[prediction[0].argmax()].strip(), 
                                                  prediction[0][prediction[0].argmax()]))
+            print(msg)
             count = count + 1
             featureData = net.blobs[self.config.layer_name].data[0].reshape(1,-1).tolist()
             result.append(featureData)
-            print(featureData)
-            print(np.asarray(featureData).shape)
-            if (count == 1):
-                break
+        
+        print('Image preprocessing completed.')
+        return result
         
         
     def run_epoch(self):
         for index, (x,labels) in enumerate(self._getNextBatch(self.config.batchSize)):
-            if (index % 10 == 0):
+            if (index % 100 == 0):
                 summary, acc = self.sess.run(
                     [self.merged, self.accuracy], 
                     feed_dict={self.x : self.valData, 
@@ -177,8 +171,6 @@ class CNNTransferModel(object):
         return acc
             
     def _getNextBatch(self, batchSize):
-        print('Number of training data points: {}'.format(len(self.trainData)))
-        print('Number of val data points: {}'.format(len(self.valData)))
         start = 0
         end = start + batchSize
         while (end < len(self.trainData)):
@@ -189,33 +181,33 @@ class CNNTransferModel(object):
         if (start < len(self.trainData)):
             yield self.trainData[start:], self.trainlabels[start:]
         
-    def runPredict(self):
+    def runPredict(self, testData, testlabels, restore=False):
+        testData = self._preprocessImages(testData)
         #restore highest scoring model
-        self.restoreModel()
-        summary, acc = self.sess.run(
-                    [self.merged, self.accuracy], 
-                    feed_dict={self.x : self.testData, 
-                               self.labels : self.testlabels,
-                               self.dropout : 1.0})
-        print('Model test accuracy: {}'.format(acc))
-        self.test_writer.add_summary(summary)
+        if restore:
+            self.restoreModel()
+        acc = self.sess.run(self.accuracy, 
+                            feed_dict={self.x : testData, 
+                                       self.labels : testlabels,
+                                       self.dropout : 1.0})
+        print('Model test accuracy: {:>6.1%}'.format(acc))
     
     def restoreModel(self):
         print('restoring model from {}'.format(self.config.restoreModel))
         self.sess = tf.Session()
-        self.saver = saver = tf.train.import_meta_graph(self.config.restoreModel)
-        saver.restore(self.sess, tf.train.latest_checkpoint(self.config.restoreModelPath))
+        self.saver = tf.train.import_meta_graph('./yolo.meta')
+        self.saver.restore(self.sess, tf.train.latest_checkpoint('./'))
         
         graph = tf.get_default_graph()
-        self.accuracy = graph.get_tensor_by_name('accuracy:0')
+        tf.reset_default_graph
+        self.dropout = graph.get_tensor_by_name('dropout:0')
         self.x = graph.get_tensor_by_name('img-input:0')
         self.labels = graph.get_tensor_by_name('label-input:0')
-        self.dropout = graph.get_tensor_by_name('dropout:0')
+        self.accuracy = graph.get_tensor_by_name('Pred/accuracy:0')
         self.saver = tf.train.Saver()
         
         
 class Config():
-    #99.3% accuracy
     batchSize = 100
     nTrainData = 55000
     nEpoch = 40
@@ -239,17 +231,36 @@ class Config():
     layer_name = 'fc7'
 
 def main():
-    # Load training and eval data
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_data = mnist.train.images  # Returns np.array
+    train_data = mnist.train.images  
     train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
-    eval_data = mnist.test.images  # Returns np.array
+    eval_data = mnist.test.images 
     eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
     
     config = Config()
-    model = CNNTransferModel(config, train_data, train_labels, eval_data, eval_labels)
+    model = CNNTransferModel(config)
+    model.constructModel()    
+    model.train(train_data, train_labels, eval_data, eval_labels)
+
+def predict():
+    mnist = tf.contrib.learn.datasets.load_dataset("mnist")
+    eval_data = mnist.test.images 
+    eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
+    config = Config()
+    model = CNNTransferModel(config)
+    model.runPredict(eval_data, eval_labels, restore=True)
+    
     
 if __name__ == '__main__':
-    main()
+    if (len(sys.argv) < 1):
+        print("Run with: python {} <option>\n <option>: '-train' or '-pred'".format(
+            sys.argv[0]))
+        
+    if (sys.argv[1] == '-pred'):
+        predict()
+    elif (sys.argv[1] == '-train'):
+        main()
+    else:
+        print('Run options: -pred or -train')
     
     

@@ -8,8 +8,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
-import os
 import sys
 
 import tensorflow as tf
@@ -230,10 +228,6 @@ def predict():
     config = Config()
     model = CNNModel(config)
     model.runPredict(eval_data, eval_labels, restore=True)
-    
-    
-    
-    #predictModel = CNNModel(config)
     
 if __name__ == '__main__':
     if (len(sys.argv) < 1):
