@@ -53,6 +53,7 @@ class CNNTransferModel(object):
         tf.summary.scalar('Pred', self.accuracy)
         
         self._initSession()
+        print('Model constructed.')
             
     def _addOptimizer(self):
         with tf.variable_scope("train_step"):
@@ -81,9 +82,13 @@ class CNNTransferModel(object):
     def train(self, trainData, trainlabels, testData, testlabels):
         print('Preprocessing images...')
         splitIndex = int(round(len(trainData)*self.config.trainValSplit))
+        
         self.trainData = self._preprocessImages(trainData[:splitIndex])
+        print('Feature extraction for training data completed.')
         self.trainlabels = trainlabels[:splitIndex]
+        
         self.valData = self._preprocessImages(trainData[splitIndex:])
+        print('Feature extraction for training data completed.')
         self.vallabels = trainlabels[splitIndex:]
         
         print('Starting training')
@@ -113,7 +118,8 @@ class CNNTransferModel(object):
         #Preprocess images into 4096 dimension vectors
         sys.path.insert(0, self.config.caffe_root + 'python')
         caffe.set_mode_gpu()
-        net = caffe.Classifier(self.config.model_prototxt, self.config.model_trained, #mean=np.load(self.config.mean_path).mean(1).mean(1), 
+        net = caffe.Classifier(self.config.model_prototxt, self.config.model_trained, 
+                               mean=np.load(self.config.mean_path).mean(1).mean(1), 
                            channel_swap=(2,1,0),
                            raw_scale=255,
                            image_dims=(224, 224))
@@ -139,7 +145,6 @@ class CNNTransferModel(object):
             featureData = net.blobs[self.config.layer_name].data[0].reshape(1,-1).tolist()
             result.append(featureData)
         
-        print('Image preprocessing completed.')
         return result
         
         
@@ -208,7 +213,7 @@ class CNNTransferModel(object):
         
         
 class Config():
-    batchSize = 100
+    batchSize = 10
     nTrainData = 55000
     nEpoch = 40
     nEpochsWithoutImprov = 4
