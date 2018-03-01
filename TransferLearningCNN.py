@@ -132,9 +132,15 @@ class CNNTransferModel(object):
             print(np.asarray(input_image).shape)
             imagevec = np.reshape(imagevec, [28,28])
             print(np.asarray(imagevec).shape)
-            imagevec = np.concatenate([[imagevec],[imagevec],[imagevec]], axis=0)
-            print(np.asarray(imagevec).shape)
-            prediction = net.predict([imagevec], oversample=False)
+            vec = []
+            for i in range(imagevec):
+                tmpvec = []
+                for j in range(imagevec[i]):
+                    tmp = [j,j,j]
+                    tmpvec.append([tmp])
+                vec.append(tmpvec)
+            print(np.asarray(vec).shape)
+            prediction = net.predict(np.asarray(vec), oversample=False)
             
             msg = ('image {} : {} ( {} )'.format(count,
                                                  labels[prediction[0].argmax()].strip(), 
