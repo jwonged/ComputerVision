@@ -65,7 +65,7 @@ class CNNModel(object):
         with tf.variable_scope('conv3'):
             conv3 = tf.layers.conv2d(inputs=pool2, 
                                      filters=64,
-                                     kernel_size=[3,3],#[5, 5], #99.2%
+                                     kernel_size=[5,5],#[5, 5], #99.2%
                                      padding="same",
                                      activation=tf.nn.relu)
             #pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
@@ -73,7 +73,7 @@ class CNNModel(object):
         with tf.variable_scope('conv4'):
             conv4 = tf.layers.conv2d(inputs=conv3,
                                     filters=64,
-                                    kernel_size=[3,3],#[5, 5],
+                                    kernel_size=[5,5],#[5, 5],
                                     padding="same",
                                     activation=tf.nn.relu)
             pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=2)
@@ -84,7 +84,7 @@ class CNNModel(object):
             
         with tf.variable_scope('fc_layers'):
             fcLayer1 = tf.layers.dense(inputs=pool4_flat, 
-                                          units=512,#1024, 
+                                          units=1024,#1024, 
                                           activation=tf.nn.relu,
                                           kernel_initializer=tf.contrib.layers.xavier_initializer())
             if (self.config.dropoutVal < 1.0):
@@ -172,7 +172,7 @@ class CNNModel(object):
                                self.dropout : self.config.dropoutVal,
                                self.lr : self.config.lossRate})
                 self.test_writer.add_summary(summary, index)
-                print('Accuracy at batch {} : {:>6.1%}'.format(index, acc))
+                print('Accuracy at batch {} : {:>6.2%}'.format(index, acc))
             _, summary, _ = self.sess.run(
                 [self.y, self.merged, self.train_op], 
                 feed_dict={self.x : x, 
@@ -208,7 +208,7 @@ class CNNModel(object):
                             feed_dict={self.x : testData, 
                                        self.labels : testlabels,
                                        self.dropout : 1.0})
-        print('Model test accuracy: {:>6.1%}'.format(acc))
+        print('Model test accuracy: {:>6.2%}'.format(acc))
     
     def restoreModel(self):
         print('restoring model from {}'.format(self.config.restoreModel))
