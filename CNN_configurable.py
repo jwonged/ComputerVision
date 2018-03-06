@@ -145,7 +145,7 @@ class CNNModel(object):
         
         for nEpoch in range(self.config.nEpoch):
             score = self.run_epoch()
-            print('Epoch {} accuracy: {:>6.1%}'.format(nEpoch,score))
+            print('Epoch {} accuracy: {:>6.2%}'.format(nEpoch,score))
             
             self.config.lossRate *= self.config.lossRateDecay
             
