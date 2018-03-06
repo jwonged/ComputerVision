@@ -23,7 +23,7 @@ class Config():
     dropoutVal = 0.5
     lossRate = 0.001
     modelOptimizer = 'adam'
-    lossRateDecay = 0.95
+    lossRateDecay = 0.9
     trainValSplit = 0.9
     
     saveModelFile = './yolo'
