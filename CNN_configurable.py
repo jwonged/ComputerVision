@@ -81,7 +81,7 @@ class CNNModel(object):
             
         with tf.variable_scope('fc_layers'):
             fcLayer1 = tf.layers.dense(inputs=pool4_flat, 
-                                          units=1024,#1024, 
+                                          units=512,#1024, 
                                           activation=tf.nn.relu,
                                           kernel_initializer=tf.contrib.layers.xavier_initializer())
             if (self.config.dropoutVal < 1.0):
