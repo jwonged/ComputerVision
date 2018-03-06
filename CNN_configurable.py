@@ -52,10 +52,10 @@ class CNNModel(object):
                                      kernel_size=[3, 3],
                                      padding="same",
                                      activation=tf.nn.relu)
-            pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+            #pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
         
         with tf.variable_scope('conv2'):
-            conv2 = tf.layers.conv2d(inputs=pool1, 
+            conv2 = tf.layers.conv2d(inputs=conv1, 
                                      filters=32,
                                      kernel_size=[3, 3],
                                      padding="same",
@@ -68,10 +68,10 @@ class CNNModel(object):
                                      kernel_size=[3,3],#[5, 5], #99.2%
                                      padding="same",
                                      activation=tf.nn.relu)
-            pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
+            #pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
         
         with tf.variable_scope('conv4'):
-            conv4 = tf.layers.conv2d(inputs=pool3,
+            conv4 = tf.layers.conv2d(inputs=conv3,
                                     filters=64,
                                     kernel_size=[3,3],#[5, 5],
                                     padding="same",
