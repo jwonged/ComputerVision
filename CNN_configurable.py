@@ -47,27 +47,42 @@ class CNNModel(object):
             tf.summary.image('input', shaped_x, 10)
         
         with tf.variable_scope('conv1'):
-            #cross correlation
             conv1 = tf.layers.conv2d(inputs=shaped_x, 
                                      filters=32,
-                                     kernel_size=[5, 5],
+                                     kernel_size=[3, 3],
                                      padding="same",
                                      activation=tf.nn.relu)
             pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
         
         with tf.variable_scope('conv2'):
-            conv2 = tf.layers.conv2d(inputs=pool1,
+            conv2 = tf.layers.conv2d(inputs=pool1, 
+                                     filters=32,
+                                     kernel_size=[3, 3],
+                                     padding="same",
+                                     activation=tf.nn.relu)
+            pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+        
+        with tf.variable_scope('conv3'):
+            conv3 = tf.layers.conv2d(inputs=pool2, 
+                                     filters=64,
+                                     kernel_size=[5, 5],
+                                     padding="same",
+                                     activation=tf.nn.relu)
+            pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
+        
+        with tf.variable_scope('conv4'):
+            conv4 = tf.layers.conv2d(inputs=pool3,
                                     filters=64,
                                     kernel_size=[5, 5],
                                     padding="same",
                                     activation=tf.nn.relu)
-            pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+            pool4 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
             
         #flatten
-        pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * 64])
+        pool4_flat = tf.reshape(pool4, [-1, 7 * 7 * 64])
             
         with tf.variable_scope('fc_layers'):
-            fcLayer1 = tf.layers.dense(inputs=pool2_flat, 
+            fcLayer1 = tf.layers.dense(inputs=pool4_flat, 
                                           units=1024, 
                                           activation=tf.nn.relu,
                                           kernel_initializer=tf.contrib.layers.xavier_initializer())
