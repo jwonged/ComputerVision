@@ -65,7 +65,7 @@ class CNNModel(object):
         with tf.variable_scope('conv3'):
             conv3 = tf.layers.conv2d(inputs=pool2, 
                                      filters=64,
-                                     kernel_size=[3,3],#[5, 5],
+                                     kernel_size=[3,3],#[5, 5], #99.2%
                                      padding="same",
                                      activation=tf.nn.relu)
             pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
@@ -84,7 +84,7 @@ class CNNModel(object):
             
         with tf.variable_scope('fc_layers'):
             fcLayer1 = tf.layers.dense(inputs=pool4_flat, 
-                                          units=1024, 
+                                          units=512,#1024, 
                                           activation=tf.nn.relu,
                                           kernel_initializer=tf.contrib.layers.xavier_initializer())
             if (self.config.dropoutVal < 1.0):
