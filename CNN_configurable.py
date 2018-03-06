@@ -79,7 +79,8 @@ class CNNModel(object):
             pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=2)
             
         #flatten
-        pool4_flat = tf.reshape(pool4, [-1, 7 * 7 * 64])
+        pool4_flat = tf.contrib.layers.flatten(pool4)
+        #pool4_flat = tf.reshape(pool4, [-1, 7 * 7 * 64])
             
         with tf.variable_scope('fc_layers'):
             fcLayer1 = tf.layers.dense(inputs=pool4_flat, 
