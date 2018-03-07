@@ -77,7 +77,6 @@ class CNNModel(object):
             
         #flatten
         pool4_flat = tf.contrib.layers.flatten(pool4)
-        #pool4_flat = tf.reshape(pool4, [-1, 7 * 7 * 64])
             
         with tf.variable_scope('fc_layers'):
             fcLayer1 = tf.layers.dense(inputs=pool4_flat, 
